@@ -43,7 +43,10 @@ export default function DashboardPage() {
     }
   };
 
-  const formatCurrency = (value: number) => `$${value.toFixed(2)}`;
+  const formatCurrency = (value: number | undefined | null) => {
+    if (value === undefined || value === null) return '$0.00';
+    return `$${value.toFixed(2)}`;
+  };
 
   const orderColumns: Column<Order>[] = [
     {
@@ -157,7 +160,7 @@ export default function DashboardPage() {
               <Typography variant="h6" gutterBottom>
                 Top Dishes by Revenue
               </Typography>
-              {metrics.topDishes.length > 0 ? (
+              {metrics.topDishes?.length > 0 ? (
                 <Card>
                   <CardContent sx={{ p: 0 }}>
                     {metrics.topDishes.slice(0, 5).map((dish, i) => (

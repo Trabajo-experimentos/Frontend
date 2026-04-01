@@ -63,22 +63,25 @@ export default function FinancePage() {
     }
   };
 
-  const formatCurrency = (value: number) => `$${value.toFixed(2)}`;
+  const formatCurrency = (value: number | undefined) => {
+    if (value === undefined || value === null) return '$0.00';
+    return `$${value.toFixed(2)}`;
+  };
 
-  const chartData: ChartData[] | undefined = report?.incomeByCategory.map((cat, i) => ({
+  const chartData: ChartData[] | undefined = report?.incomeByCategory?.map((cat, i) => ({
     name: cat.category,
     income: cat.amount,
-    expenses: report.expensesByCategory[i]?.amount || 0,
-    profit: cat.amount - (report.expensesByCategory[i]?.amount || 0),
+    expenses: report.expensesByCategory?.[i]?.amount || 0,
+    profit: cat.amount - (report.expensesByCategory?.[i]?.amount || 0),
   }));
 
-  const topDishesData = metrics?.topDishes.map((d) => ({
+  const topDishesData = metrics?.topDishes?.map((d) => ({
     name: d.dishName,
     revenue: d.totalRevenue,
     quantity: d.quantitySold,
   }));
 
-  const expensePieData = report?.expensesByCategory.map((cat) => ({
+  const expensePieData = report?.expensesByCategory?.map((cat) => ({
     name: cat.category,
     value: cat.amount,
   }));

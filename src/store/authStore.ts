@@ -61,18 +61,24 @@ export const useAuthStore = create<AuthState>()(
         set({ isLoading: true, error: null });
         try {
           const { authService } = await import('@/services/authService');
-          const response = await authService.register(data);
+          await authService.register(data);
+
+          // Auto-login after registration since backend doesn't return token
+          const loginResponse = await authService.login({
+            email: data.email,
+            password: data.password,
+          });
 
           set({
-            user: response.user,
-            token: response.token,
+            user: loginResponse.user,
+            token: loginResponse.token,
             isAuthenticated: true,
             isLoading: false,
             error: null,
           });
 
           // Store token in localStorage for axios interceptor
-          localStorage.setItem('token', response.token);
+          localStorage.setItem('token', loginResponse.token);
         } catch (error) {
           const message = error instanceof Error ? error.message : 'Registration failed';
           set({
