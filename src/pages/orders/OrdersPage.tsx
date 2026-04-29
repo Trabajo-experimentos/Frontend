@@ -40,6 +40,9 @@ interface LineItemForm extends CreateLineItemRequest {
   unitPrice: number;
 }
 
+// Helper to get first dish ID or 0 if no dishes
+const getInitialDishId = (dishes: Dish[]) => dishes.length > 0 ? dishes[0].id : 0;
+
 export default function OrdersPage() {
   const { t } = useI18n();
   const [orders, setOrders] = useState<Order[]>([]);
@@ -93,7 +96,14 @@ export default function OrdersPage() {
   };
 
   const addLineItem = () => {
-    setLineItems([...lineItems, { dishId: 0, quantity: 1, dishName: '', unitPrice: 0 }]);
+    const initialDishId = getInitialDishId(dishes);
+    const initialDish = dishes.find(d => d.id === initialDishId);
+    setLineItems([...lineItems, {
+      dishId: initialDishId,
+      quantity: 1,
+      dishName: initialDish?.name || '',
+      unitPrice: initialDish?.price || 0
+    }]);
   };
 
   const updateLineItem = (index: number, field: keyof LineItemForm, value: string | number) => {
