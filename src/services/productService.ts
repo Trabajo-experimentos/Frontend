@@ -9,30 +9,46 @@ import type {
 interface BackendProduct {
   id: number;
   name: string;
+  description?: string;
+  category?: string;
+  supplier?: string;
+  lowStockThreshold?: number;
   stockLevel: number;
   unitOfMeasure: string;
   unitCost: number;
   createdAt: string;
 }
 
-const DEFAULT_LOW_STOCK_THRESHOLD = 10;
+interface ProductCategory {
+  value: string;
+  label: string;
+  labelEs: string;
+  labelEn: string;
+}
 
 const mapProduct = (product: BackendProduct): Product => ({
   id: product.id,
   name: product.name,
+  description: product.description,
+  category: product.category,
+  supplier: product.supplier,
   stockLevel: product.stockLevel,
   unitOfMeasure: product.unitOfMeasure,
   unitCost: product.unitCost,
-  lowStockThreshold: DEFAULT_LOW_STOCK_THRESHOLD,
+  lowStockThreshold: product.lowStockThreshold ?? 10,
   createdAt: product.createdAt,
   updatedAt: product.createdAt,
 });
 
 const toProductRequest = (data: CreateProductRequest | UpdateProductRequest) => ({
   name: data.name,
+  description: data.description,
+  category: data.category,
+  supplier: data.supplier,
   stockLevel: data.stockLevel,
   unitOfMeasure: data.unitOfMeasure,
   unitCost: data.unitCost,
+  lowStockThreshold: data.lowStockThreshold,
 });
 
 class ProductService {
@@ -66,6 +82,11 @@ class ProductService {
 
   async delete(id: number): Promise<void> {
     await api.delete(`${this.basePath}/${id}`);
+  }
+
+  async getCategories(): Promise<ProductCategory[]> {
+    const response = await api.get<ApiResponse<ProductCategory[]>>(`${this.basePath}/categories`);
+    return response.data.data;
   }
 }
 
