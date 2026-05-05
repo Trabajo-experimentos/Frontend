@@ -285,7 +285,7 @@ export default function SettingsPage() {
             <Card
               sx={{
                 bgcolor: 'primary.main',
-                color: 'primary.contrastText',
+                color: '#000000',
                 maxWidth: 640,
               }}
             >
