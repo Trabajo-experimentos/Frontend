@@ -14,6 +14,7 @@ interface AuthState {
   register: (data: RegisterRequest) => Promise<void>;
   logout: () => void;
   updateProfile: (data: UpdateProfileRequest) => Promise<void>;
+  refreshUserProfile: () => Promise<void>;
   clearError: () => void;
   setUser: (user: User | null) => void;
   setToken: (token: string | null) => void;
@@ -115,6 +116,24 @@ export const useAuthStore = create<AuthState>()(
           });
         } catch (error) {
           const message = error instanceof Error ? error.message : 'Update failed';
+          set({ isLoading: false, error: message });
+          throw error;
+        }
+      },
+
+      refreshUserProfile: async () => {
+        set({ isLoading: true, error: null });
+        try {
+          const { authService } = await import('@/services/authService');
+          const updatedUser = await authService.getProfile();
+
+          set({
+            user: updatedUser,
+            isLoading: false,
+            error: null,
+          });
+        } catch (error) {
+          const message = error instanceof Error ? error.message : 'Failed to refresh profile';
           set({ isLoading: false, error: message });
           throw error;
         }

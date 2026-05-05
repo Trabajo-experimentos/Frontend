@@ -8,6 +8,8 @@ import {
   Stack,
   Alert,
   Skeleton,
+  Chip,
+  Typography,
 } from '@mui/material';
 import {
   BarChart,
@@ -70,6 +72,11 @@ export default function FinancePage() {
     return `$${value.toFixed(2)}`;
   };
 
+  const formatDate = (dateStr: string) => {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' });
+  };
+
   const chartData: ChartData[] | undefined = report?.incomeByCategory?.map((cat, i) => ({
     name: cat.category === 'Income' ? t('finance.income') : cat.category,
     income: cat.amount,
@@ -127,29 +134,37 @@ export default function FinancePage() {
         title={t('finance.title')}
         subtitle={t('finance.subtitle')}
         action={
-          <ButtonGroup variant="outlined" size="small" sx={{ width: { xs: '100%', sm: 'auto' } }}>
-            <Button
-              onClick={() => setPeriod('DAILY')}
-              variant={period === 'DAILY' ? 'contained' : 'outlined'}
-              sx={{ flex: { xs: 1, sm: 'initial' } }}
-            >
-              {t('finance.daily')}
-            </Button>
-            <Button
-              onClick={() => setPeriod('WEEKLY')}
-              variant={period === 'WEEKLY' ? 'contained' : 'outlined'}
-              sx={{ flex: { xs: 1, sm: 'initial' } }}
-            >
-              {t('finance.weekly')}
-            </Button>
-            <Button
-              onClick={() => setPeriod('MONTHLY')}
-              variant={period === 'MONTHLY' ? 'contained' : 'outlined'}
-              sx={{ flex: { xs: 1, sm: 'initial' } }}
-            >
-              {t('finance.monthly')}
-            </Button>
-          </ButtonGroup>
+          <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 1, alignItems: { sm: 'center' } }}>
+            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+              <Typography variant="body2" color="text.secondary">
+                {formatDate(report.startDate)} - {formatDate(report.endDate)}
+              </Typography>
+              <Chip label={`${report.orderCount} ${t('finance.orders')}`} size="small" color="warning" variant="outlined" />
+            </Box>
+            <ButtonGroup variant="outlined" size="small" sx={{ width: { xs: '100%', sm: 'auto' } }}>
+              <Button
+                onClick={() => setPeriod('DAILY')}
+                variant={period === 'DAILY' ? 'contained' : 'outlined'}
+                sx={{ flex: { xs: 1, sm: 'initial' } }}
+              >
+                {t('finance.daily')}
+              </Button>
+              <Button
+                onClick={() => setPeriod('WEEKLY')}
+                variant={period === 'WEEKLY' ? 'contained' : 'outlined'}
+                sx={{ flex: { xs: 1, sm: 'initial' } }}
+              >
+                {t('finance.weekly')}
+              </Button>
+              <Button
+                onClick={() => setPeriod('MONTHLY')}
+                variant={period === 'MONTHLY' ? 'contained' : 'outlined'}
+                sx={{ flex: { xs: 1, sm: 'initial' } }}
+              >
+                {t('finance.monthly')}
+              </Button>
+            </ButtonGroup>
+          </Box>
         }
       />
 

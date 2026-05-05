@@ -18,7 +18,7 @@ import {
   Paper,
   Typography,
 } from '@mui/material';
-import { Add, Delete, Remove, AddCircle } from '@mui/icons-material';
+import { Add, Delete, Remove, AddCircle, ArrowForward, CheckCircle, Cancel } from '@mui/icons-material';
 import { PageHeader, ConfirmDialog, DataTable, EmptyState } from '@/components/common';
 import { orderService, dishService } from '@/services';
 import type { Order, Dish, CreateLineItemRequest, OrderType, OrderStatus, Column } from '@/types';
@@ -168,12 +168,43 @@ export default function OrdersPage() {
     }
   };
 
+  const handleAdvanceStatus = async (order: Order) => {
+    try {
+      await orderService.advanceStatus(order.id);
+      void loadData();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t('orders.loadError'));
+    }
+  };
+
+  const handleCancelStatus = async (order: Order) => {
+    try {
+      await orderService.cancelStatus(order.id);
+      void loadData();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t('orders.loadError'));
+    }
+  };
+
+  const getNextStatusLabel = (status: OrderStatus): string => {
+    switch (status) {
+      case 'PENDING':
+        return t('orders.status.PREPARING');
+      case 'PREPARING':
+        return t('orders.status.READY');
+      case 'READY':
+        return t('orders.status.DELIVERED');
+      default:
+        return '';
+    }
+  };
+
   const columns: Column<Order>[] = [
     {
       id: 'orderNumber',
       label: t('orders.orderNumber'),
       render: (row: Order) => (
-        <Box sx={{ fontWeight: 'bold' }}>#{row.orderNumber.slice(-6)}</Box>
+        <Box sx={{ fontWeight: 'bold' }}>#{row.orderNumber}</Box>
       ),
     },
     {
@@ -217,13 +248,38 @@ export default function OrdersPage() {
       id: 'actions',
       label: t('common.actions'),
       render: (row: Order) => (
-        <IconButton
-          size="small"
-          color="error"
-          onClick={() => setDeleteConfirm({ open: true, order: row })}
-        >
-          <Delete fontSize="small" />
-        </IconButton>
+        <Stack direction="row" spacing={0.5}>
+          {/* Advance status button - show for PENDING, PREPARING, READY */}
+          {row.status !== 'DELIVERED' && row.status !== 'CANCELLED' && (
+            <IconButton
+              size="small"
+              color="primary"
+              onClick={() => void handleAdvanceStatus(row)}
+              title={getNextStatusLabel(row.status)}
+            >
+              <ArrowForward fontSize="small" />
+            </IconButton>
+          )}
+          {/* Cancel button - show for non-final states */}
+          {row.status !== 'DELIVERED' && row.status !== 'CANCELLED' && (
+            <IconButton
+              size="small"
+              color="warning"
+              onClick={() => void handleCancelStatus(row)}
+              title={t('orders.status.CANCELLED')}
+            >
+              <Cancel fontSize="small" />
+            </IconButton>
+          )}
+          {/* Delete button - always show */}
+          <IconButton
+            size="small"
+            color="error"
+            onClick={() => setDeleteConfirm({ open: true, order: row })}
+          >
+            <Delete fontSize="small" />
+          </IconButton>
+        </Stack>
       ),
     },
   ];
@@ -366,7 +422,7 @@ export default function OrdersPage() {
         open={deleteConfirm.open}
         title={t('orders.deleteTitle')}
         message={t('orders.deleteMessage', {
-          number: deleteConfirm.order?.orderNumber.slice(-6) || '',
+          number: deleteConfirm.order?.orderNumber || '',
         })}
         onConfirm={() => void handleDelete()}
         onCancel={() => setDeleteConfirm({ open: false, order: null })}

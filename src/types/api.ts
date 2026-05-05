@@ -195,6 +195,7 @@ export interface FinancialReport {
   expensesByCategory: CategoryReport[];
   topDishes: TopDish[];
   previousPeriodComparison?: PeriodComparison;
+  orderCount: number;
 }
 
 export type ReportPeriod = 'DAILY' | 'WEEKLY' | 'MONTHLY';

@@ -145,8 +145,9 @@ export default function LoginPage() {
               size="large"
               sx={{ mt: 3, mb: 2, minHeight: 48 }}
               disabled={isLoading}
+              startIcon={isLoading ? <CircularProgress size={20} color="inherit" /> : undefined}
             >
-              {isLoading ? <CircularProgress size={24} /> : t('common.signIn')}
+              {isLoading ? t('auth.loggingIn') : t('common.signIn')}
             </Button>
 
             <Box sx={{ textAlign: 'center' }}>
