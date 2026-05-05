@@ -13,8 +13,11 @@ interface RetryableAxiosRequestConfig extends InternalAxiosRequestConfig {
 const MAX_RETRIES = 3;
 const BASE_TIMEOUT = 10000;
 
+const apiURL = import.meta.env.VITE_API_URL || '';
+console.log('🔧 API URL:', apiURL);
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || '',
+  baseURL: apiURL,
   timeout: BASE_TIMEOUT,
   headers: {
     'Content-Type': 'application/json',
