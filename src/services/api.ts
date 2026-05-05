@@ -13,7 +13,7 @@ interface RetryableAxiosRequestConfig extends InternalAxiosRequestConfig {
 const MAX_RETRIES = 3;
 const BASE_TIMEOUT = 10000;
 
-const apiURL = import.meta.env.VITE_API_URL || '';
+const apiURL = import.meta.env.VITE_API_URL || 'https://foodflow-backend-y3lj.onrender.com';
 console.log('🔧 API URL:', apiURL);
 
 const api = axios.create({
