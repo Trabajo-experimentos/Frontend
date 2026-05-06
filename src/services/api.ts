@@ -37,7 +37,11 @@ api.interceptors.request.use(
 );
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 // Response interceptor - handle errors with retry logic and better messages
+=======
+// Response interceptor - handle 401
+>>>>>>> parent of 6767818 (fix(app): improve dashboard orders and inventory finance flows)
 =======
 // Response interceptor - handle 401
 >>>>>>> parent of 6767818 (fix(app): improve dashboard orders and inventory finance flows)

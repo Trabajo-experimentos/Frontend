@@ -16,7 +16,10 @@ interface BackendOrderLineItem {
 interface BackendOrder {
   id: number;
 <<<<<<< HEAD
+<<<<<<< HEAD
   orderNumber: string;
+=======
+>>>>>>> parent of 6767818 (fix(app): improve dashboard orders and inventory finance flows)
 =======
 >>>>>>> parent of 6767818 (fix(app): improve dashboard orders and inventory finance flows)
   tableIdentifier: string;
@@ -24,7 +27,10 @@ interface BackendOrder {
   lineItems: BackendOrderLineItem[];
   totalAmount: number;
 <<<<<<< HEAD
+<<<<<<< HEAD
   status: OrderStatus;
+=======
+>>>>>>> parent of 6767818 (fix(app): improve dashboard orders and inventory finance flows)
 =======
 >>>>>>> parent of 6767818 (fix(app): improve dashboard orders and inventory finance flows)
 }
@@ -35,7 +41,11 @@ const mapOrder = (order: BackendOrder): Order => ({
   customerName: order.tableIdentifier,
   orderType: 'DINE_IN',
 <<<<<<< HEAD
+<<<<<<< HEAD
   status: order.status || 'PENDING',
+=======
+  status: 'PENDING',
+>>>>>>> parent of 6767818 (fix(app): improve dashboard orders and inventory finance flows)
 =======
   status: 'PENDING',
 >>>>>>> parent of 6767818 (fix(app): improve dashboard orders and inventory finance flows)
@@ -82,6 +92,7 @@ class OrderService {
     await api.delete(`${this.basePath}/${id}`);
   }
 <<<<<<< HEAD
+<<<<<<< HEAD
 
   async advanceStatus(id: number): Promise<Order> {
     const response = await api.put<ApiResponse<BackendOrder>>(`${this.basePath}/${id}/advance`);
@@ -97,6 +108,8 @@ class OrderService {
     const response = await api.put<ApiResponse<BackendOrder>>(`${this.basePath}/${id}/status?status=${status}`);
     return mapOrder(response.data.data);
   }
+=======
+>>>>>>> parent of 6767818 (fix(app): improve dashboard orders and inventory finance flows)
 =======
 >>>>>>> parent of 6767818 (fix(app): improve dashboard orders and inventory finance flows)
 }

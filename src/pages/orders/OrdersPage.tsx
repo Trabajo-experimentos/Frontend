@@ -19,7 +19,11 @@ import {
   Typography,
 } from '@mui/material';
 <<<<<<< HEAD
+<<<<<<< HEAD
 import { Add, Delete, Remove, AddCircle, ArrowForward, Cancel } from '@mui/icons-material';
+=======
+import { Add, Delete, Remove, AddCircle } from '@mui/icons-material';
+>>>>>>> parent of 6767818 (fix(app): improve dashboard orders and inventory finance flows)
 =======
 import { Add, Delete, Remove, AddCircle } from '@mui/icons-material';
 >>>>>>> parent of 6767818 (fix(app): improve dashboard orders and inventory finance flows)
@@ -173,6 +177,7 @@ export default function OrdersPage() {
   };
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   const handleAdvanceStatus = async (order: Order) => {
     try {
       await orderService.advanceStatus(order.id);
@@ -204,6 +209,8 @@ export default function OrdersPage() {
     }
   };
 
+=======
+>>>>>>> parent of 6767818 (fix(app): improve dashboard orders and inventory finance flows)
 =======
 >>>>>>> parent of 6767818 (fix(app): improve dashboard orders and inventory finance flows)
   const columns: Column<Order>[] = [
@@ -256,6 +263,7 @@ export default function OrdersPage() {
       label: t('common.actions'),
       render: (row: Order) => (
 <<<<<<< HEAD
+<<<<<<< HEAD
         <Stack direction="row" spacing={0.5}>
           {/* Advance status button - show for PENDING, PREPARING, READY */}
           {row.status !== 'DELIVERED' && row.status !== 'CANCELLED' && (
@@ -289,6 +297,8 @@ export default function OrdersPage() {
           </IconButton>
         </Stack>
 =======
+=======
+>>>>>>> parent of 6767818 (fix(app): improve dashboard orders and inventory finance flows)
         <IconButton
           size="small"
           color="error"
@@ -296,6 +306,9 @@ export default function OrdersPage() {
         >
           <Delete fontSize="small" />
         </IconButton>
+<<<<<<< HEAD
+>>>>>>> parent of 6767818 (fix(app): improve dashboard orders and inventory finance flows)
+=======
 >>>>>>> parent of 6767818 (fix(app): improve dashboard orders and inventory finance flows)
       ),
     },

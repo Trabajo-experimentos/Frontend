@@ -29,7 +29,11 @@ const mapProduct = (product: BackendProduct): Product => ({
   unitOfMeasure: product.unitOfMeasure,
   unitCost: product.unitCost,
 <<<<<<< HEAD
+<<<<<<< HEAD
   lowStockThreshold: product.lowStockThreshold ?? 10,
+=======
+  lowStockThreshold: DEFAULT_LOW_STOCK_THRESHOLD,
+>>>>>>> parent of 6767818 (fix(app): improve dashboard orders and inventory finance flows)
 =======
   lowStockThreshold: DEFAULT_LOW_STOCK_THRESHOLD,
 >>>>>>> parent of 6767818 (fix(app): improve dashboard orders and inventory finance flows)
@@ -77,11 +81,14 @@ class ProductService {
     await api.delete(`${this.basePath}/${id}`);
   }
 <<<<<<< HEAD
+<<<<<<< HEAD
 
   async getCategories(): Promise<ProductCategory[]> {
     const response = await api.get<ApiResponse<ProductCategory[]>>(`${this.basePath}/categories`);
     return response.data.data;
   }
+=======
+>>>>>>> parent of 6767818 (fix(app): improve dashboard orders and inventory finance flows)
 =======
 >>>>>>> parent of 6767818 (fix(app): improve dashboard orders and inventory finance flows)
 }
