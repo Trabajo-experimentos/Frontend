@@ -104,14 +104,6 @@ export interface Product {
   updatedAt: string;
 }
 
-export interface ProductCategory {
-  id: number;
-  name: string;
-  value: string;
-  label: string;
-  createdAt?: string;
-}
-
 export interface CreateProductRequest {
   name: string;
   description?: string;
@@ -151,7 +143,7 @@ export interface Order {
 
 export type OrderType = 'DINE_IN' | 'TAKEAWAY' | 'DELIVERY';
 
-export type OrderStatus = 'PENDIENTE' | 'ENTREGADA' | 'CANCELADA';
+export type OrderStatus = 'PENDING' | 'PREPARING' | 'READY' | 'DELIVERED' | 'CANCELLED';
 
 export interface LineItem {
   id: number;
@@ -180,9 +172,7 @@ export interface DashboardMetrics {
   totalIncome: number;
   totalExpenses: number;
   profit: number;
-  period: ReportPeriod;
-  startDate?: string;
-  endDate?: string;
+  period: string;
   topDishes: TopDish[];
   orderCount: number;
 }

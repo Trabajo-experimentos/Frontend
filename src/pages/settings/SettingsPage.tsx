@@ -167,6 +167,7 @@ export default function SettingsPage() {
         </Tabs>
       </Box>
 
+      {/* Profile Tab */}
       <TabPanel value={tabValue} index={0}>
         <Card sx={{ maxWidth: 640 }}>
           <CardContent sx={{ p: { xs: 2.5, sm: 3 } }}>
@@ -213,6 +214,7 @@ export default function SettingsPage() {
         </Card>
       </TabPanel>
 
+      {/* Security Tab */}
       <TabPanel value={tabValue} index={1}>
         <Card sx={{ maxWidth: 640 }}>
           <CardContent sx={{ p: { xs: 2.5, sm: 3 } }}>
@@ -261,6 +263,7 @@ export default function SettingsPage() {
         </Card>
       </TabPanel>
 
+      {/* Subscription Tab */}
       <TabPanel value={tabValue} index={2}>
         {subscription && (
           <Box sx={{ mb: 4 }}>
@@ -341,6 +344,7 @@ export default function SettingsPage() {
         </Grid>
       </TabPanel>
 
+      {/* Upgrade Confirmation Dialog */}
       <Dialog open={upgradeDialog.open} onClose={() => setUpgradeDialog({ open: false, plan: null })}>
         <DialogTitle>{t('settings.confirmSubscriptionTitle')}</DialogTitle>
         <DialogContent>

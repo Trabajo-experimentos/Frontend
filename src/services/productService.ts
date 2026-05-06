@@ -2,7 +2,6 @@ import api from './api';
 import type {
   ApiResponse,
   Product,
-  ProductCategory,
   CreateProductRequest,
   UpdateProductRequest,
 } from '@/types';
@@ -20,7 +19,12 @@ interface BackendProduct {
   createdAt: string;
 }
 
-const DEFAULT_LOW_STOCK_THRESHOLD = 10;
+interface ProductCategory {
+  value: string;
+  label: string;
+  labelEs: string;
+  labelEn: string;
+}
 
 const mapProduct = (product: BackendProduct): Product => ({
   id: product.id,
@@ -31,7 +35,7 @@ const mapProduct = (product: BackendProduct): Product => ({
   stockLevel: product.stockLevel,
   unitOfMeasure: product.unitOfMeasure,
   unitCost: product.unitCost,
-  lowStockThreshold: product.lowStockThreshold ?? DEFAULT_LOW_STOCK_THRESHOLD,
+  lowStockThreshold: product.lowStockThreshold ?? 10,
   createdAt: product.createdAt,
   updatedAt: product.createdAt,
 });
@@ -83,20 +87,6 @@ class ProductService {
   async getCategories(): Promise<ProductCategory[]> {
     const response = await api.get<ApiResponse<ProductCategory[]>>(`${this.basePath}/categories`);
     return response.data.data;
-  }
-
-  async createCategory(name: string): Promise<ProductCategory> {
-    const response = await api.post<ApiResponse<ProductCategory>>(`${this.basePath}/categories`, { name });
-    return response.data.data;
-  }
-
-  async updateCategory(id: number, name: string): Promise<ProductCategory> {
-    const response = await api.put<ApiResponse<ProductCategory>>(`${this.basePath}/categories/${id}`, { name });
-    return response.data.data;
-  }
-
-  async deleteCategory(id: number): Promise<void> {
-    await api.delete(`${this.basePath}/categories/${id}`);
   }
 }
 

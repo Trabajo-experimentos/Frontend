@@ -24,9 +24,11 @@ export const ORDER_TYPES = {
 } as const;
 
 export const ORDER_STATUS = {
-  PENDIENTE: 'PENDIENTE',
-  ENTREGADA: 'ENTREGADA',
-  CANCELADA: 'CANCELADA',
+  PENDING: 'PENDING',
+  PREPARING: 'PREPARING',
+  READY: 'READY',
+  DELIVERED: 'DELIVERED',
+  CANCELLED: 'CANCELLED',
 } as const;
 
 export const REPORT_PERIODS = {
