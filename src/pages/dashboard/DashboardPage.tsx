@@ -8,13 +8,15 @@ import {
   Alert,
   Skeleton,
   Button,
+  ButtonGroup,
+  Chip,
   Divider,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { AttachMoney, ShoppingCart, Restaurant } from '@mui/icons-material';
 import { MetricCard, DataTable, EmptyState, PageHeader } from '@/components/common';
 import { financeService, orderService } from '@/services';
-import type { DashboardMetrics, Column, Order } from '@/types';
+import type { DashboardMetrics, Column, Order, ReportPeriod } from '@/types';
 import { useI18n } from '@/i18n';
 
 const buildMetricsFromOrders = (orders: Order[]): DashboardMetrics => {
@@ -23,7 +25,9 @@ const buildMetricsFromOrders = (orders: Order[]): DashboardMetrics => {
     { dishId: number; dishName: string; totalRevenue: number; quantitySold: number }
   >();
 
-  orders.forEach((order) => {
+  const deliveredOrders = orders.filter((order) => order.status === 'ENTREGADA');
+
+  deliveredOrders.forEach((order) => {
     order.lineItems.forEach((item) => {
       const current = dishTotals.get(item.dishId) || {
         dishId: item.dishId,
@@ -37,23 +41,24 @@ const buildMetricsFromOrders = (orders: Order[]): DashboardMetrics => {
     });
   });
 
-  const totalIncome = orders.reduce((sum, order) => sum + order.totalAmount, 0);
+  const totalIncome = deliveredOrders.reduce((sum, order) => sum + order.totalAmount, 0);
 
   return {
     totalIncome,
     totalExpenses: 0,
     profit: totalIncome,
-    period: 'CURRENT',
+    period: 'DAILY',
     topDishes: Array.from(dishTotals.values()).sort(
       (a, b) => b.totalRevenue - a.totalRevenue
     ),
-    orderCount: orders.length,
+    orderCount: deliveredOrders.length,
   };
 };
 
 export default function DashboardPage() {
   const navigate = useNavigate();
   const { t } = useI18n();
+  const [period, setPeriod] = useState<ReportPeriod>('DAILY');
   const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
   const [recentOrders, setRecentOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
@@ -61,14 +66,14 @@ export default function DashboardPage() {
 
   useEffect(() => {
     void loadData();
-  }, []);
+  }, [period]);
 
   const loadData = async () => {
     try {
       setLoading(true);
       setError(null);
       const [metricsResult, ordersResult] = await Promise.allSettled([
-        financeService.getDashboardMetrics(),
+        financeService.getDashboardMetrics(period),
         orderService.getAll(),
       ]);
 
@@ -79,7 +84,7 @@ export default function DashboardPage() {
         const fallbackMetrics = buildMetricsFromOrders(ordersData);
         setMetrics({
           ...metricsResult.value,
-          orderCount: ordersData.length,
+          orderCount: metricsResult.value.orderCount,
           topDishes:
             metricsResult.value.topDishes.length > 0
               ? metricsResult.value.topDishes
@@ -100,6 +105,11 @@ export default function DashboardPage() {
   const formatCurrency = (value: number | undefined | null) => {
     if (value === undefined || value === null) return '$0.00';
     return `$${value.toFixed(2)}`;
+  };
+
+  const formatDate = (dateStr?: string) => {
+    if (!dateStr) return '';
+    return new Date(dateStr).toLocaleDateString('es-ES', { day: '2-digit', month: 'short' });
   };
 
   const orderColumns: Column<Order>[] = [
@@ -143,7 +153,44 @@ export default function DashboardPage() {
 
   return (
     <Box>
-      <PageHeader title={t('dashboard.title')} subtitle={t('dashboard.subtitle')} />
+      <PageHeader
+        title={t('dashboard.title')}
+        subtitle={t('dashboard.subtitle')}
+        action={
+          <Stack spacing={1} alignItems={{ xs: 'stretch', sm: 'flex-end' }} sx={{ width: { xs: '100%', sm: 'auto' } }}>
+            {metrics?.startDate && metrics?.endDate && (
+              <Chip
+                label={`${formatDate(metrics.startDate)} - ${formatDate(metrics.endDate)}`}
+                size="small"
+                variant="outlined"
+              />
+            )}
+            <ButtonGroup variant="outlined" size="small" sx={{ width: { xs: '100%', sm: 'auto' } }}>
+              <Button
+                onClick={() => setPeriod('DAILY')}
+                variant={period === 'DAILY' ? 'contained' : 'outlined'}
+                sx={{ flex: { xs: 1, sm: 'initial' } }}
+              >
+                {t('finance.daily')}
+              </Button>
+              <Button
+                onClick={() => setPeriod('WEEKLY')}
+                variant={period === 'WEEKLY' ? 'contained' : 'outlined'}
+                sx={{ flex: { xs: 1, sm: 'initial' } }}
+              >
+                {t('finance.weekly')}
+              </Button>
+              <Button
+                onClick={() => setPeriod('MONTHLY')}
+                variant={period === 'MONTHLY' ? 'contained' : 'outlined'}
+                sx={{ flex: { xs: 1, sm: 'initial' } }}
+              >
+                {t('finance.monthly')}
+              </Button>
+            </ButtonGroup>
+          </Stack>
+        }
+      />
 
       {metrics && (
         <>

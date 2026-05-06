@@ -8,8 +8,6 @@ import {
   Stack,
   Alert,
   Skeleton,
-  Chip,
-  Typography,
 } from '@mui/material';
 import {
   BarChart,
@@ -55,7 +53,7 @@ export default function FinancePage() {
       setLoading(true);
       setError(null);
       const [metricsData, reportData] = await Promise.all([
-        financeService.getDashboardMetrics(),
+        financeService.getDashboardMetrics(period),
         financeService.getReport(period),
       ]);
       setMetrics(metricsData);
@@ -72,19 +70,17 @@ export default function FinancePage() {
     return `$${value.toFixed(2)}`;
   };
 
-  const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' });
-  };
+  const chartData: ChartData[] | undefined = report
+    ? [{
+        name: t(`finance.${period.toLowerCase()}`),
+        income: report.totalIncome,
+        expenses: report.totalExpenses,
+        profit: report.profit,
+      }]
+    : undefined;
 
-  const chartData: ChartData[] | undefined = report?.incomeByCategory?.map((cat, i) => ({
-    name: cat.category === 'Income' ? t('finance.income') : cat.category,
-    income: cat.amount,
-    expenses: report.expensesByCategory?.[i]?.amount || 0,
-    profit: cat.amount - (report.expensesByCategory?.[i]?.amount || 0),
-  }));
-
-  const topDishesData = metrics?.topDishes?.map((d) => ({
+  const topDishesSource = report?.topDishes?.length ? report.topDishes : metrics?.topDishes || [];
+  const topDishesData = topDishesSource.map((d) => ({
     name: d.dishName,
     revenue: d.totalRevenue,
     quantity: d.quantitySold,
@@ -134,41 +130,32 @@ export default function FinancePage() {
         title={t('finance.title')}
         subtitle={t('finance.subtitle')}
         action={
-          <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 1, alignItems: { sm: 'center' } }}>
-            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-              <Typography variant="body2" color="text.secondary">
-                {formatDate(report.startDate)} - {formatDate(report.endDate)}
-              </Typography>
-              <Chip label={`${report.orderCount} ${t('finance.orders')}`} size="small" color="warning" variant="outlined" />
-            </Box>
-            <ButtonGroup variant="outlined" size="small" sx={{ width: { xs: '100%', sm: 'auto' } }}>
-              <Button
-                onClick={() => setPeriod('DAILY')}
-                variant={period === 'DAILY' ? 'contained' : 'outlined'}
-                sx={{ flex: { xs: 1, sm: 'initial' } }}
-              >
-                {t('finance.daily')}
-              </Button>
-              <Button
-                onClick={() => setPeriod('WEEKLY')}
-                variant={period === 'WEEKLY' ? 'contained' : 'outlined'}
-                sx={{ flex: { xs: 1, sm: 'initial' } }}
-              >
-                {t('finance.weekly')}
-              </Button>
-              <Button
-                onClick={() => setPeriod('MONTHLY')}
-                variant={period === 'MONTHLY' ? 'contained' : 'outlined'}
-                sx={{ flex: { xs: 1, sm: 'initial' } }}
-              >
-                {t('finance.monthly')}
-              </Button>
-            </ButtonGroup>
-          </Box>
+          <ButtonGroup variant="outlined" size="small" sx={{ width: { xs: '100%', sm: 'auto' } }}>
+            <Button
+              onClick={() => setPeriod('DAILY')}
+              variant={period === 'DAILY' ? 'contained' : 'outlined'}
+              sx={{ flex: { xs: 1, sm: 'initial' } }}
+            >
+              {t('finance.daily')}
+            </Button>
+            <Button
+              onClick={() => setPeriod('WEEKLY')}
+              variant={period === 'WEEKLY' ? 'contained' : 'outlined'}
+              sx={{ flex: { xs: 1, sm: 'initial' } }}
+            >
+              {t('finance.weekly')}
+            </Button>
+            <Button
+              onClick={() => setPeriod('MONTHLY')}
+              variant={period === 'MONTHLY' ? 'contained' : 'outlined'}
+              sx={{ flex: { xs: 1, sm: 'initial' } }}
+            >
+              {t('finance.monthly')}
+            </Button>
+          </ButtonGroup>
         }
       />
 
-      {/* Metrics Cards */}
       <Stack direction={{ xs: 'column', md: 'row' }} spacing={2.5} sx={{ mb: 3.5 }}>
         <MetricCard
           title={t('finance.totalIncome')}
@@ -205,16 +192,14 @@ export default function FinancePage() {
         />
         <MetricCard
           title={t('finance.orders')}
-          value={metrics.orderCount}
+          value={report.orderCount}
           subtitle={t('finance.totalOrders')}
           color="warning"
           sx={{ flex: 1 }}
         />
       </Stack>
 
-      {/* Charts */}
       <Stack spacing={3}>
-        {/* Income vs Expenses Bar Chart */}
         <Card>
           <CardContent sx={{ p: { xs: 2.5, sm: 3 } }}>
             <Box sx={{ mb: 2 }}>
@@ -244,7 +229,6 @@ export default function FinancePage() {
         </Card>
 
         <Stack direction={{ xs: 'column', md: 'row' }} spacing={3}>
-          {/* Top Dishes Chart */}
           <Card sx={{ flex: 1, minWidth: 0 }}>
             <CardContent sx={{ p: { xs: 2.5, sm: 3 } }}>
               <Box sx={{ mb: 2 }}>
@@ -270,7 +254,6 @@ export default function FinancePage() {
             </CardContent>
           </Card>
 
-          {/* Expenses Breakdown Pie Chart */}
           <Card sx={{ flex: 1, minWidth: 0 }}>
             <CardContent sx={{ p: { xs: 2.5, sm: 3 } }}>
               <Box sx={{ mb: 2 }}>

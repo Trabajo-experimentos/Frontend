@@ -17,31 +17,25 @@ import {
   InputLabel,
   Paper,
   Typography,
+  Tooltip,
 } from '@mui/material';
-import { Add, Delete, Remove, AddCircle, ArrowForward, Cancel } from '@mui/icons-material';
+import { Add, Delete, Remove, AddCircle, CheckCircle, Cancel } from '@mui/icons-material';
 import { PageHeader, ConfirmDialog, DataTable, EmptyState } from '@/components/common';
 import { orderService, dishService } from '@/services';
-import type { Order, Dish, CreateLineItemRequest, OrderType, OrderStatus, Column } from '@/types';
+import type { Order, Dish, CreateLineItemRequest, OrderStatus, Column } from '@/types';
 import { Receipt } from '@mui/icons-material';
 import { useI18n } from '@/i18n';
 
-const orderTypes: OrderType[] = ['DINE_IN', 'TAKEAWAY', 'DELIVERY'];
-
 const statusColors: Record<OrderStatus, 'success' | 'info' | 'warning' | 'error' | 'default'> = {
-  PENDING: 'default',
-  PREPARING: 'info',
-  READY: 'warning',
-  DELIVERED: 'success',
-  CANCELLED: 'error',
+  PENDIENTE: 'warning',
+  ENTREGADA: 'success',
+  CANCELADA: 'error',
 };
 
 interface LineItemForm extends CreateLineItemRequest {
   dishName: string;
   unitPrice: number;
 }
-
-// Helper to get first dish ID or 0 if no dishes
-const getInitialDishId = (dishes: Dish[]) => dishes.length > 0 ? dishes[0].id : 0;
 
 export default function OrdersPage() {
   const { t } = useI18n();
@@ -96,14 +90,7 @@ export default function OrdersPage() {
   };
 
   const addLineItem = () => {
-    const initialDishId = getInitialDishId(dishes);
-    const initialDish = dishes.find(d => d.id === initialDishId);
-    setLineItems([...lineItems, {
-      dishId: initialDishId,
-      quantity: 1,
-      dishName: initialDish?.name || '',
-      unitPrice: initialDish?.price || 0
-    }]);
+    setLineItems([...lineItems, { dishId: 0, quantity: 1, dishName: '', unitPrice: 0 }]);
   };
 
   const updateLineItem = (index: number, field: keyof LineItemForm, value: string | number) => {
@@ -170,7 +157,7 @@ export default function OrdersPage() {
 
   const handleAdvanceStatus = async (order: Order) => {
     try {
-      await orderService.advanceStatus(order.id);
+      await orderService.updateStatus(order.id, 'ENTREGADA');
       void loadData();
     } catch (err) {
       setError(err instanceof Error ? err.message : t('orders.loadError'));
@@ -186,42 +173,18 @@ export default function OrdersPage() {
     }
   };
 
-  const getNextStatusLabel = (status: OrderStatus): string => {
-    switch (status) {
-      case 'PENDING':
-        return t('orders.status.PREPARING');
-      case 'PREPARING':
-        return t('orders.status.READY');
-      case 'READY':
-        return t('orders.status.DELIVERED');
-      default:
-        return '';
-    }
-  };
-
   const columns: Column<Order>[] = [
     {
       id: 'orderNumber',
       label: t('orders.orderNumber'),
       render: (row: Order) => (
-        <Box sx={{ fontWeight: 'bold' }}>#{row.orderNumber}</Box>
+        <Box sx={{ fontWeight: 'bold' }}>#{row.orderNumber.slice(-6)}</Box>
       ),
     },
     {
       id: 'customer',
       label: t('orders.table'),
       render: (row: Order) => row.customerName || t('orders.walkIn'),
-    },
-    {
-      id: 'type',
-      label: t('orders.type'),
-      render: (row: Order) => (
-        <Chip
-          label={orderTypes.includes(row.orderType) ? t(`orders.type.${row.orderType}`) : row.orderType}
-          size="small"
-          variant="outlined"
-        />
-      ),
     },
     {
       id: 'items',
@@ -249,36 +212,37 @@ export default function OrdersPage() {
       label: t('common.actions'),
       render: (row: Order) => (
         <Stack direction="row" spacing={0.5}>
-          {/* Advance status button - show for PENDING, PREPARING, READY */}
-          {row.status !== 'DELIVERED' && row.status !== 'CANCELLED' && (
+          {row.status === 'PENDIENTE' && (
+            <Tooltip title={t('orders.deliver')}>
+              <IconButton
+                size="small"
+                color="success"
+                onClick={() => void handleAdvanceStatus(row)}
+              >
+                <CheckCircle fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          )}
+          {row.status === 'PENDIENTE' && (
+            <Tooltip title={t('orders.cancelOrder')}>
+              <IconButton
+                size="small"
+                color="warning"
+                onClick={() => void handleCancelStatus(row)}
+              >
+                <Cancel fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          )}
+          <Tooltip title={t('common.delete')}>
             <IconButton
               size="small"
-              color="primary"
-              onClick={() => void handleAdvanceStatus(row)}
-              title={getNextStatusLabel(row.status)}
+              color="error"
+              onClick={() => setDeleteConfirm({ open: true, order: row })}
             >
-              <ArrowForward fontSize="small" />
+              <Delete fontSize="small" />
             </IconButton>
-          )}
-          {/* Cancel button - show for non-final states */}
-          {row.status !== 'DELIVERED' && row.status !== 'CANCELLED' && (
-            <IconButton
-              size="small"
-              color="warning"
-              onClick={() => void handleCancelStatus(row)}
-              title={t('orders.status.CANCELLED')}
-            >
-              <Cancel fontSize="small" />
-            </IconButton>
-          )}
-          {/* Delete button - always show */}
-          <IconButton
-            size="small"
-            color="error"
-            onClick={() => setDeleteConfirm({ open: true, order: row })}
-          >
-            <Delete fontSize="small" />
-          </IconButton>
+          </Tooltip>
         </Stack>
       ),
     },
@@ -325,7 +289,6 @@ export default function OrdersPage() {
         />
       )}
 
-      {/* Create Order Dialog */}
       <Dialog open={openModal} onClose={handleCloseModal} maxWidth="md" fullWidth>
         <DialogTitle>{t('orders.createTitle')}</DialogTitle>
         <DialogContent>
@@ -417,12 +380,11 @@ export default function OrdersPage() {
         </DialogActions>
       </Dialog>
 
-      {/* Delete Confirmation */}
       <ConfirmDialog
         open={deleteConfirm.open}
         title={t('orders.deleteTitle')}
         message={t('orders.deleteMessage', {
-          number: deleteConfirm.order?.orderNumber || '',
+          number: deleteConfirm.order?.orderNumber.slice(-6) || '',
         })}
         onConfirm={() => void handleDelete()}
         onCancel={() => setDeleteConfirm({ open: false, order: null })}
