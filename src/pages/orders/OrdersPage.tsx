@@ -18,7 +18,11 @@ import {
   Paper,
   Typography,
 } from '@mui/material';
+<<<<<<< HEAD
 import { Add, Delete, Remove, AddCircle, ArrowForward, Cancel } from '@mui/icons-material';
+=======
+import { Add, Delete, Remove, AddCircle } from '@mui/icons-material';
+>>>>>>> parent of 6767818 (fix(app): improve dashboard orders and inventory finance flows)
 import { PageHeader, ConfirmDialog, DataTable, EmptyState } from '@/components/common';
 import { orderService, dishService } from '@/services';
 import type { Order, Dish, CreateLineItemRequest, OrderType, OrderStatus, Column } from '@/types';
@@ -168,6 +172,7 @@ export default function OrdersPage() {
     }
   };
 
+<<<<<<< HEAD
   const handleAdvanceStatus = async (order: Order) => {
     try {
       await orderService.advanceStatus(order.id);
@@ -199,6 +204,8 @@ export default function OrdersPage() {
     }
   };
 
+=======
+>>>>>>> parent of 6767818 (fix(app): improve dashboard orders and inventory finance flows)
   const columns: Column<Order>[] = [
     {
       id: 'orderNumber',
@@ -248,6 +255,7 @@ export default function OrdersPage() {
       id: 'actions',
       label: t('common.actions'),
       render: (row: Order) => (
+<<<<<<< HEAD
         <Stack direction="row" spacing={0.5}>
           {/* Advance status button - show for PENDING, PREPARING, READY */}
           {row.status !== 'DELIVERED' && row.status !== 'CANCELLED' && (
@@ -280,6 +288,15 @@ export default function OrdersPage() {
             <Delete fontSize="small" />
           </IconButton>
         </Stack>
+=======
+        <IconButton
+          size="small"
+          color="error"
+          onClick={() => setDeleteConfirm({ open: true, order: row })}
+        >
+          <Delete fontSize="small" />
+        </IconButton>
+>>>>>>> parent of 6767818 (fix(app): improve dashboard orders and inventory finance flows)
       ),
     },
   ];

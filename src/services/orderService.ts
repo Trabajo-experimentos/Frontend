@@ -3,7 +3,6 @@ import type {
   ApiResponse,
   Order,
   CreateOrderRequest,
-  OrderStatus,
 } from '@/types';
 
 interface BackendOrderLineItem {
@@ -16,20 +15,30 @@ interface BackendOrderLineItem {
 
 interface BackendOrder {
   id: number;
+<<<<<<< HEAD
   orderNumber: string;
+=======
+>>>>>>> parent of 6767818 (fix(app): improve dashboard orders and inventory finance flows)
   tableIdentifier: string;
   orderDate: string;
   lineItems: BackendOrderLineItem[];
   totalAmount: number;
+<<<<<<< HEAD
   status: OrderStatus;
+=======
+>>>>>>> parent of 6767818 (fix(app): improve dashboard orders and inventory finance flows)
 }
 
 const mapOrder = (order: BackendOrder): Order => ({
   id: order.id,
-  orderNumber: order.orderNumber || String(order.id),
+  orderNumber: String(order.id),
   customerName: order.tableIdentifier,
   orderType: 'DINE_IN',
+<<<<<<< HEAD
   status: order.status || 'PENDING',
+=======
+  status: 'PENDING',
+>>>>>>> parent of 6767818 (fix(app): improve dashboard orders and inventory finance flows)
   totalAmount: order.totalAmount,
   lineItems: order.lineItems.map((item, index) => ({
     id: index,
@@ -72,6 +81,7 @@ class OrderService {
   async delete(id: number): Promise<void> {
     await api.delete(`${this.basePath}/${id}`);
   }
+<<<<<<< HEAD
 
   async advanceStatus(id: number): Promise<Order> {
     const response = await api.put<ApiResponse<BackendOrder>>(`${this.basePath}/${id}/advance`);
@@ -87,6 +97,8 @@ class OrderService {
     const response = await api.put<ApiResponse<BackendOrder>>(`${this.basePath}/${id}/status?status=${status}`);
     return mapOrder(response.data.data);
   }
+=======
+>>>>>>> parent of 6767818 (fix(app): improve dashboard orders and inventory finance flows)
 }
 
 export const orderService = new OrderService();

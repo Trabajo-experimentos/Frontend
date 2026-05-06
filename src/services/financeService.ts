@@ -41,7 +41,6 @@ interface BackendFinancialReport {
   };
   topDishes?: BackendTopDish[];
   expenseBreakdown?: BackendExpenseCategory[];
-  orderCount?: number;
 }
 
 const mapDashboardMetrics = (metrics: BackendDashboard): DashboardMetrics => ({
@@ -75,7 +74,6 @@ const mapFinancialReport = (report: BackendFinancialReport): FinancialReport => 
     expenseChange: report.metrics.expensesVariation || 0,
     profitChange: 0,
   },
-  orderCount: report.orderCount || 0,
 });
 
 class FinanceService {
