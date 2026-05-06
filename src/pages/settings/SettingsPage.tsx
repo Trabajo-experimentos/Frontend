@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
   Box,
   Card,
@@ -42,9 +41,8 @@ function TabPanel({ children, value, index }: TabPanelProps) {
 }
 
 export default function SettingsPage() {
-  const { user, updateProfile, refreshUserProfile } = useAuthStore();
+  const { user, updateProfile } = useAuthStore();
   const { t } = useI18n();
-  const navigate = useNavigate();
   const [tabValue, setTabValue] = useState(0);
   const [profileData, setProfileData] = useState({ name: '', email: '' });
   const [passwordData, setPasswordData] = useState({
@@ -95,21 +93,10 @@ export default function SettingsPage() {
 
   const handleProfileUpdate = async () => {
     try {
-      const emailChanged = user?.email !== profileData.email;
       await updateProfile({ name: profileData.name, email: profileData.email });
+      setSuccess(t('settings.profileUpdated'));
       setError('');
-
-      if (emailChanged) {
-        setSuccess(t('settings.profileUpdated') + '. ' + t('settings.emailChangedRedirect'));
-        setTimeout(() => {
-          // Logout and redirect to login
-          useAuthStore.getState().logout();
-          navigate('/login');
-        }, 3000);
-      } else {
-        setSuccess(t('settings.profileUpdated'));
-        setTimeout(() => setSuccess(''), 3000);
-      }
+      setTimeout(() => setSuccess(''), 3000);
     } catch (err) {
       setError(err instanceof Error ? err.message : t('settings.profileUpdateError'));
       setSuccess('');
@@ -142,8 +129,6 @@ export default function SettingsPage() {
       try {
         await subscriptionService.subscribe({ plan: upgradeDialog.plan.type });
         setUpgradeDialog({ open: false, plan: null });
-        // Reload user profile to get updated subscription type
-        await refreshUserProfile();
         await loadSubscriptionData();
         setSuccess(t('settings.subscriptionUpdated'));
         setTimeout(() => setSuccess(''), 3000);
@@ -182,7 +167,6 @@ export default function SettingsPage() {
         </Tabs>
       </Box>
 
-      {/* Profile Tab */}
       <TabPanel value={tabValue} index={0}>
         <Card sx={{ maxWidth: 640 }}>
           <CardContent sx={{ p: { xs: 2.5, sm: 3 } }}>
@@ -229,7 +213,6 @@ export default function SettingsPage() {
         </Card>
       </TabPanel>
 
-      {/* Security Tab */}
       <TabPanel value={tabValue} index={1}>
         <Card sx={{ maxWidth: 640 }}>
           <CardContent sx={{ p: { xs: 2.5, sm: 3 } }}>
@@ -278,14 +261,13 @@ export default function SettingsPage() {
         </Card>
       </TabPanel>
 
-      {/* Subscription Tab */}
       <TabPanel value={tabValue} index={2}>
         {subscription && (
           <Box sx={{ mb: 4 }}>
             <Card
               sx={{
                 bgcolor: 'primary.main',
-                color: '#000000',
+                color: 'primary.contrastText',
                 maxWidth: 640,
               }}
             >
@@ -359,7 +341,6 @@ export default function SettingsPage() {
         </Grid>
       </TabPanel>
 
-      {/* Upgrade Confirmation Dialog */}
       <Dialog open={upgradeDialog.open} onClose={() => setUpgradeDialog({ open: false, plan: null })}>
         <DialogTitle>{t('settings.confirmSubscriptionTitle')}</DialogTitle>
         <DialogContent>
