@@ -3,6 +3,7 @@ import type {
   ApiResponse,
   Order,
   CreateOrderRequest,
+  OrderStatus,
 } from '@/types';
 
 interface BackendOrderLineItem {
@@ -15,18 +16,37 @@ interface BackendOrderLineItem {
 
 interface BackendOrder {
   id: number;
+  orderNumber?: string;
   tableIdentifier: string;
   orderDate: string;
   lineItems: BackendOrderLineItem[];
   totalAmount: number;
+  status?: string;
 }
+
+const mapOrderStatus = (status?: string): OrderStatus => {
+  switch ((status || '').toUpperCase()) {
+    case 'ENTREGADA':
+    case 'DELIVERED':
+      return 'ENTREGADA';
+    case 'CANCELADA':
+    case 'CANCELLED':
+      return 'CANCELADA';
+    case 'PENDING':
+    case 'PREPARING':
+    case 'READY':
+    case 'PENDIENTE':
+    default:
+      return 'PENDIENTE';
+  }
+};
 
 const mapOrder = (order: BackendOrder): Order => ({
   id: order.id,
-  orderNumber: String(order.id),
+  orderNumber: order.orderNumber || String(order.id),
   customerName: order.tableIdentifier,
   orderType: 'DINE_IN',
-  status: 'PENDING',
+  status: mapOrderStatus(order.status),
   totalAmount: order.totalAmount,
   lineItems: order.lineItems.map((item, index) => ({
     id: index,
@@ -68,6 +88,23 @@ class OrderService {
 
   async delete(id: number): Promise<void> {
     await api.delete(`${this.basePath}/${id}`);
+  }
+
+  async advanceStatus(id: number): Promise<Order> {
+    const response = await api.put<ApiResponse<BackendOrder>>(`${this.basePath}/${id}/advance`);
+    return mapOrder(response.data.data);
+  }
+
+  async cancelStatus(id: number): Promise<Order> {
+    const response = await api.put<ApiResponse<BackendOrder>>(`${this.basePath}/${id}/cancel`);
+    return mapOrder(response.data.data);
+  }
+
+  async updateStatus(id: number, status: OrderStatus): Promise<Order> {
+    const response = await api.put<ApiResponse<BackendOrder>>(`${this.basePath}/${id}/status`, null, {
+      params: { status },
+    });
+    return mapOrder(response.data.data);
   }
 }
 

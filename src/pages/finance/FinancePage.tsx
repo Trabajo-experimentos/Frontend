@@ -53,7 +53,7 @@ export default function FinancePage() {
       setLoading(true);
       setError(null);
       const [metricsData, reportData] = await Promise.all([
-        financeService.getDashboardMetrics(),
+        financeService.getDashboardMetrics(period),
         financeService.getReport(period),
       ]);
       setMetrics(metricsData);
@@ -70,14 +70,17 @@ export default function FinancePage() {
     return `$${value.toFixed(2)}`;
   };
 
-  const chartData: ChartData[] | undefined = report?.incomeByCategory?.map((cat, i) => ({
-    name: cat.category === 'Income' ? t('finance.income') : cat.category,
-    income: cat.amount,
-    expenses: report.expensesByCategory?.[i]?.amount || 0,
-    profit: cat.amount - (report.expensesByCategory?.[i]?.amount || 0),
-  }));
+  const chartData: ChartData[] | undefined = report
+    ? [{
+        name: t(`finance.${period.toLowerCase()}`),
+        income: report.totalIncome,
+        expenses: report.totalExpenses,
+        profit: report.profit,
+      }]
+    : undefined;
 
-  const topDishesData = metrics?.topDishes?.map((d) => ({
+  const topDishesSource = report?.topDishes?.length ? report.topDishes : metrics?.topDishes || [];
+  const topDishesData = topDishesSource.map((d) => ({
     name: d.dishName,
     revenue: d.totalRevenue,
     quantity: d.quantitySold,
@@ -153,7 +156,6 @@ export default function FinancePage() {
         }
       />
 
-      {/* Metrics Cards */}
       <Stack direction={{ xs: 'column', md: 'row' }} spacing={2.5} sx={{ mb: 3.5 }}>
         <MetricCard
           title={t('finance.totalIncome')}
@@ -190,16 +192,14 @@ export default function FinancePage() {
         />
         <MetricCard
           title={t('finance.orders')}
-          value={metrics.orderCount}
+          value={report.orderCount}
           subtitle={t('finance.totalOrders')}
           color="warning"
           sx={{ flex: 1 }}
         />
       </Stack>
 
-      {/* Charts */}
       <Stack spacing={3}>
-        {/* Income vs Expenses Bar Chart */}
         <Card>
           <CardContent sx={{ p: { xs: 2.5, sm: 3 } }}>
             <Box sx={{ mb: 2 }}>
@@ -229,7 +229,6 @@ export default function FinancePage() {
         </Card>
 
         <Stack direction={{ xs: 'column', md: 'row' }} spacing={3}>
-          {/* Top Dishes Chart */}
           <Card sx={{ flex: 1, minWidth: 0 }}>
             <CardContent sx={{ p: { xs: 2.5, sm: 3 } }}>
               <Box sx={{ mb: 2 }}>
@@ -255,7 +254,6 @@ export default function FinancePage() {
             </CardContent>
           </Card>
 
-          {/* Expenses Breakdown Pie Chart */}
           <Card sx={{ flex: 1, minWidth: 0 }}>
             <CardContent sx={{ p: { xs: 2.5, sm: 3 } }}>
               <Box sx={{ mb: 2 }}>

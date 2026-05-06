@@ -13,7 +13,6 @@ const api = axios.create({
   },
 });
 
-// Request interceptor - add JWT token
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
@@ -25,7 +24,6 @@ api.interceptors.request.use(
   (error) => Promise.reject(error instanceof Error ? error : new Error('Request setup failed'))
 );
 
-// Response interceptor - handle 401
 api.interceptors.response.use(
   (response) => response,
   (error: AxiosError<ApiErrorBody>) => {

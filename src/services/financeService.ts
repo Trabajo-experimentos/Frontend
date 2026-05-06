@@ -14,11 +14,15 @@ interface BackendTopDish {
 }
 
 interface BackendDashboard {
+  period?: string;
+  startDate?: string;
+  endDate?: string;
   totalIncome: number;
   totalExpenses: number;
   netProfit: number;
   incomeVariation?: number;
   expensesVariation?: number;
+  orderCount?: number;
   top5Dishes?: BackendTopDish[];
 }
 
@@ -41,15 +45,18 @@ interface BackendFinancialReport {
   };
   topDishes?: BackendTopDish[];
   expenseBreakdown?: BackendExpenseCategory[];
+  orderCount?: number;
 }
 
 const mapDashboardMetrics = (metrics: BackendDashboard): DashboardMetrics => ({
   totalIncome: metrics.totalIncome,
   totalExpenses: metrics.totalExpenses,
   profit: metrics.netProfit,
-  period: 'CURRENT',
+  period: (metrics.period as ReportPeriod) || 'DAILY',
+  startDate: metrics.startDate,
+  endDate: metrics.endDate,
   topDishes: metrics.top5Dishes || [],
-  orderCount: 0,
+  orderCount: metrics.orderCount || 0,
 });
 
 const mapFinancialReport = (report: BackendFinancialReport): FinancialReport => ({
@@ -74,13 +81,16 @@ const mapFinancialReport = (report: BackendFinancialReport): FinancialReport => 
     expenseChange: report.metrics.expensesVariation || 0,
     profitChange: 0,
   },
+  orderCount: report.orderCount || 0,
 });
 
 class FinanceService {
   private readonly basePath = '/api/finance';
 
-  async getDashboardMetrics(): Promise<DashboardMetrics> {
-    const response = await api.get<ApiResponse<BackendDashboard>>(`${this.basePath}/dashboard`);
+  async getDashboardMetrics(period: ReportPeriod = 'DAILY'): Promise<DashboardMetrics> {
+    const response = await api.get<ApiResponse<BackendDashboard>>(`${this.basePath}/dashboard`, {
+      params: { period },
+    });
     return mapDashboardMetrics(response.data.data);
   }
 
