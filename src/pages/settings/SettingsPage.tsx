@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Box,
   Card,
@@ -41,8 +42,9 @@ function TabPanel({ children, value, index }: TabPanelProps) {
 }
 
 export default function SettingsPage() {
-  const { user, updateProfile } = useAuthStore();
+  const { user, updateProfile, refreshUserProfile } = useAuthStore();
   const { t } = useI18n();
+  const navigate = useNavigate();
   const [tabValue, setTabValue] = useState(0);
   const [profileData, setProfileData] = useState({ name: '', email: '' });
   const [passwordData, setPasswordData] = useState({
@@ -93,10 +95,21 @@ export default function SettingsPage() {
 
   const handleProfileUpdate = async () => {
     try {
+      const emailChanged = user?.email !== profileData.email;
       await updateProfile({ name: profileData.name, email: profileData.email });
-      setSuccess(t('settings.profileUpdated'));
       setError('');
-      setTimeout(() => setSuccess(''), 3000);
+
+      if (emailChanged) {
+        setSuccess(t('settings.profileUpdated') + '. ' + t('settings.emailChangedRedirect'));
+        setTimeout(() => {
+          // Logout and redirect to login
+          useAuthStore.getState().logout();
+          navigate('/login');
+        }, 3000);
+      } else {
+        setSuccess(t('settings.profileUpdated'));
+        setTimeout(() => setSuccess(''), 3000);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : t('settings.profileUpdateError'));
       setSuccess('');
@@ -129,6 +142,8 @@ export default function SettingsPage() {
       try {
         await subscriptionService.subscribe({ plan: upgradeDialog.plan.type });
         setUpgradeDialog({ open: false, plan: null });
+        // Reload user profile to get updated subscription type
+        await refreshUserProfile();
         await loadSubscriptionData();
         setSuccess(t('settings.subscriptionUpdated'));
         setTimeout(() => setSuccess(''), 3000);
@@ -267,7 +282,7 @@ export default function SettingsPage() {
             <Card
               sx={{
                 bgcolor: 'primary.main',
-                color: 'primary.contrastText',
+                color: '#000000',
                 maxWidth: 640,
               }}
             >
